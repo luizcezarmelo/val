@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gerador MAPA/Holter – Impressão Fiel</title>
+
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #eef2f5; }
+  .header { text-align: center; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.08); margin-bottom: 20px; }
+  .header h1 { margin: 0; }
+  .header label { display: block; margin-top: 10px; font-weight: 700; }
+  .container { display: flex; gap: 20px; flex-wrap: wrap; }
+  .list-section { flex: 1; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.08); min-width: 320px; }
+  h2 { margin: 0 0 12px; border-bottom: 2px solid #007bff; display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
+  .name-counter { font-size: .8em; background: #e9ecef; padding: 5px 10px; border-radius: 14px; color: #495057; }
+  input[type="text"], input[type="search"] { width: 100%; padding: 8px 12px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 6px; }
+  ol { padding-left: 40px; height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px; padding-top: 10px; padding-bottom: 10px; margin: 0 0 12px; }
+  li { margin-bottom: 10px; }
+  li.hidden { display: none; }
+  button { width: 100%; padding: 12px; border: 0; border-radius: 8px; font-size: 16px; color: #fff; background: #007bff; cursor: pointer; }
+  button:hover { background: #0056b3; }
+</style>
+
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+  <div class="header">
+    <h1>Gerador MAPA / HOLTER</h1>
+    <label for="schedule-date">Data do Agendamento:</label>
+    <input type="date" id="schedule-date" />
+  </div>
+
+  <div class="container">
+    <div class="list-section">
+      <h2>MAPA <span id="mapa-counter" class="name-counter">0/30</span></h2>
+      <input type="search" id="search-mapa" placeholder="Pesquisar nome (a partir do 6º caractere)" />
+      <ol id="mapa-list"></ol>
+      <button id="btn-print-mapa">Imprimir MAPA (Termo + Diário)</button>
+    </div>
+
+    <div class="list-section">
+      <h2>Holter <span id="holter-counter" class="name-counter">0/30</span></h2>
+      <input type="search" id="search-holter" placeholder="Pesquisar nome (a partir do 6º caractere)" />
+      <ol id="holter-list"></ol>
+      <button id="btn-print-holter">Imprimir HOLTER (Termo + Diário)</button>
+    </div>
+  </div>
+
+<script type="module">
+/* Firebase */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCeygrkw2tQHHYy5ocBcMBnRyYvAVXRW2g",
+  authDomain: "agenda-da-val.firebaseapp.com",
+  projectId: "agenda-da-val",
+  storageBucket: "agenda-da-val.firebasestorage.app",
+  messagingSenderId: "4483197465",
+  appId: "1:4483197465:web:a31a604e5ab0a3e7021888"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.firebase = {
+  saveData: async (date, data) => { await setDoc(doc(db,"schedules",date),data); },
+  loadData: async (date) => { const snap = await getDoc(doc(db,"schedules",date)); return snap.exists()?snap.data():null; }
+};
+</script>
+
+<script>
+const LIST_SIZE = 30;
+const PDFs = { DIARIO_MAPA:"dmapa.pdf", DIARIO_HOLTER:"dholter.pdf", TERMO_MAPA:"tmapa.pdf", TERMO_HOLTER:"tholter.pdf" };
+
+function init(){
+  createList("mapa");
+  createList("holter");
+  document.getElementById("schedule-date").value = new Date().toISOString().split("T")[0];
+  document.getElementById("schedule-date").addEventListener("change",loadData);
+  setTimeout(loadData,400);
+
+  document.getElementById("btn-print-mapa").addEventListener("click",()=>printReport("mapa"));
+  document.getElementById("btn-print-holter").addEventListener("click",()=>printReport("holter"));
+
+  document.getElementById("search-mapa").addEventListener("input",(e)=>filterList("mapa",e.target.value));
+  document.getElementById("search-holter").addEventListener("input",(e)=>filterList("holter",e.target.value));
+
+  setInterval(saveData,10000);
+}
+
+function createList(type){
+  const list=document.getElementById(`${type}-list`);
+  for(let i=1;i<=LIST_SIZE;i++){
+    const li=document.createElement("li");
+    const input=document.createElement("input");
+    input.type="text";input.placeholder=`Paciente ${i}`;
+    input.addEventListener("input",()=>{updateCounter(type);debounceSave();});
+    li.appendChild(input);list.appendChild(li);
+  }
+}
+
+function updateCounter(type){
+  const count=Array.from(document.querySelectorAll(`#${type}-list input`)).filter(i=>i.value.trim()!=="").length;
+  document.getElementById(`${type}-counter`).textContent=`${count}/${LIST_SIZE}`;
+}
+
+function filterList(type,term){
+  const items=document.querySelectorAll(`#${type}-list li`);
+  term=term.trim().toLowerCase();
+  items.forEach(li=>{
+    const name=li.querySelector("input").value.toLowerCase();
+    li.classList.toggle("hidden",(term.length>=6 && !name.includes(term)));
+  });
+}
+
+let debounceTimer;
+function debounceSave(){clearTimeout(debounceTimer);debounceTimer=setTimeout(saveData,500);}
+
+async function saveData(){
+  const date=document.getElementById("schedule-date").value;if(!date)return;
+  const mapa=Array.from(document.querySelectorAll("#mapa-list input")).map(i=>i.value);
+  const holter=Array.from(document.querySelectorAll("#holter-list input")).map(i=>i.value);
+  await window.firebase.saveData(date,{mapa,holter});
+}
+
+async function loadData(){
+  const date=document.getElementById("schedule-date").value;if(!date)return;
+  const data=await window.firebase.loadData(date);
+  ["mapa","holter"].forEach(type=>{
+    const inputs=document.querySelectorAll(`#${type}-list input`);
+    inputs.forEach((input,i)=>input.value=(data&&data[type]&&data[type][i])?data[type][i]:"");
+    updateCounter(type);
+  });
+}
+
+/* PDF LIB */
+async function printReport(type){
+  const names=Array.from(document.querySelectorAll(`#${type}-list input`)).map(i=>i.value.trim()).filter(Boolean);
+  if(!names.length){alert("Nenhum nome preenchido");return;}
+
+  const pdfs=(type==="mapa")?[PDFs.TERMO_MAPA,PDFs.DIARIO_MAPA]:[PDFs.TERMO_HOLTER,PDFs.DIARIO_HOLTER];
+  const merged=await PDFLib.PDFDocument.create();
+
+  for(const name of names){
+    for(const p of pdfs){
+      const bytes=await fetch(p).then(r=>r.arrayBuffer());
+      const src=await PDFLib.PDFDocument.load(bytes);
+      const [page]=await merged.copyPages(src,[0]);
+      merged.addPage(page);
+      // Aqui podemos adicionar overlay para NOME (mesmo esquema anterior) se precisar
+    }
+  }
+  const final=await merged.save();
+  const url=URL.createObjectURL(new Blob([final],{type:"application/pdf"}));
+  window.open(url,"_blank");
+}
+
+init();
+</script>
+</body>
+</html>
