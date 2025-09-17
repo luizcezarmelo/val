@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Controle de Despesas v2.6</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Despesas</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         :root {
@@ -98,6 +98,14 @@
             border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
             margin-bottom: 24px;
         }
+        #agendaBtn {
+    color: var(--nubank-color);
+    border-color: var(--nubank-color);
+}
+#agendaBtn:hover {
+    background-color: var(--nubank-color);
+    color: white;
+}
         .summary-box h3 {
             margin-top: 0; margin-bottom: 8px; font-size: 0.9rem;
             font-weight: 500; color: var(--text-color-secondary);
@@ -165,6 +173,7 @@
         <button id="saveDataBtn" title="Salvar backup local em .txt">Salvar</button>
         <button id="restoreDataBtn" title="Restaurar dados a partir de um backup">Resgatar</button>
         <button id="clearAllBtn" title="Limpar todos os dados deste mês">Limpar tudo</button>
+        <button id="agendaBtn" title="Agenda" onclick="window.open('https://luizcezarmelo.github.io/val/agenda', '_blank')">Agenda</button>
         <input type="file" id="restoreFileInput" accept=".txt,.json" style="display: none;">
     </div>
 
@@ -324,16 +333,18 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
+    // Your web app's Firebase configuration
     const firebaseConfig = {
-        apiKey: "AIzaSyBiikcagIm1p7wJG6DsHijkvdy1fpDBn8Y",
-        authDomain: "bd-teste-c931c.firebaseapp.com",
-        databaseURL: "https://bd-teste-c931c-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "bd-teste-c931c",
-        storageBucket: "bd-teste-c931c.appspot.com",
-        messagingSenderId: "270308100761",
-        appId: "1:270308100761:web:ae34fde6d5ae86b67b0608"
+      apiKey: "AIzaSyCeygrkw2tQHHYy5ocBcMBnRyYvAVXRW2g",
+      authDomain: "agenda-da-val.firebaseapp.com",
+      databaseURL: "https://agenda-da-val-default-rtdb.firebaseio.com",
+      projectId: "agenda-da-val",
+      storageBucket: "agenda-da-val.appspot.com",
+      messagingSenderId: "4483197465",
+      appId: "1:4483197465:web:a31a604e5ab0a3e7021888"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
     let current_date = new Date();
