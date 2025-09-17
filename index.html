@@ -921,7 +921,6 @@
                 if (e.target.hasAttribute('contenteditable')) {
                     updateTotals(type);
                     saveData();
-                    ensureEmptyRow(tbody);
                 }
             });
 
@@ -930,21 +929,19 @@
                     e.preventDefault();
                     const cell = e.target;
                     const row = cell.parentElement;
-                    const nextRow = row.nextElementSibling;
-                    const isLastColumn = cell.cellIndex === (row.cells.length - 1);
-                    
-                    if (isLastColumn) {
-                        const isNextRowEmpty = nextRow && Array.from(nextRow.cells).every(c => c.textContent.trim() === '');
-                        
-                        if (nextRow && !isNextRowEmpty) {
+                    const nextCellIndex = cell.cellIndex + 1;
+
+                    if (nextCellIndex < row.cells.length) {
+                        const nextCell = row.cells[nextCellIndex];
+                        if (nextCell && nextCell.hasAttribute('contenteditable')) {
+                            nextCell.focus();
+                        }
+                    } else {
+                        const nextRow = row.nextElementSibling;
+                        if (nextRow) {
                             nextRow.cells[0].focus();
                         } else {
                             addNewRow(tbody, true);
-                        }
-                    } else {
-                        const nextCell = cell.nextElementSibling;
-                        if (nextCell && nextCell.hasAttribute('contenteditable')) {
-                            nextCell.focus();
                         }
                     }
                 }
