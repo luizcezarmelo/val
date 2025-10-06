@@ -669,16 +669,24 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCeygrkw2tQHHYy5ocBcMBnRyYvAVXRW2g",
-            authDomain: "agenda-da-val.firebaseapp.com",
-            databaseURL: "https://agenda-da-val-default-rtdb.firebaseio.com",
-            projectId: "agenda-da-val",
-            storageBucket: "agenda-da-val.appspot.com",
-            messagingSenderId: "4483197465",
-            appId: "1:4483197465:web:a31a604e5ab0a3e7021888"
-        };
+     // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCeygrkw2tQHHYy5ocBcMBnRyYvAVXRW2g",
+  authDomain: "agenda-da-val.firebaseapp.com",
+  databaseURL: "https://agenda-da-val-default-rtdb.firebaseio.com",
+  projectId: "agenda-da-val",
+  storageBucket: "agenda-da-val.firebasestorage.app",
+  messagingSenderId: "4483197465",
+  appId: "1:4483197465:web:a31a604e5ab0a3e7021888"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
