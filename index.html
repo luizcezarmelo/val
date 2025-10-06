@@ -739,7 +739,11 @@
             ui.loginMessage.textContent = "Digite seu código de 4 dígitos para continuar.";
             ui.loginButton.textContent = "Entrar";
             const handleLogin = () => {
-                if (ui.passcodeInput.value === correctPasscode) {
+                // =========================================================================
+                // CORREÇÃO APLICADA AQUI
+                // Compara o valor do input (string) com a senha do banco (convertida para string)
+                // =========================================================================
+                if (ui.passcodeInput.value === String(correctPasscode)) {
                     ui.loginOverlay.style.opacity = '0';
                     setTimeout(() => ui.loginOverlay.style.display = 'none', 300);
                     startApp();
