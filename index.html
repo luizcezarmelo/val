@@ -726,9 +726,13 @@
             const passcodeRef = ref(database, 'passcode');
             onValue(passcodeRef, (snapshot) => {
                 const savedPasscode = snapshot.val();
+                // --- DEBUGGING START ---
+                console.log("Valor bruto recebido do Firebase:", savedPasscode);
+                // --- DEBUGGING END ---
                 if (savedPasscode) {
                     setupLoginScreen(savedPasscode);
                 } else {
+                    console.log("Nenhuma senha encontrada, iniciando tela de primeiro acesso.");
                     setupFirstAccessScreen();
                 }
             }, { onlyOnce: true });
@@ -738,16 +742,31 @@
             ui.loginTitle.textContent = "Acessar Painel";
             ui.loginMessage.textContent = "Digite seu código de 4 dígitos para continuar.";
             ui.loginButton.textContent = "Entrar";
+
+            // --- DEBUGGING START ---
+            console.log("Senha salva no banco (correctPasscode):", correctPasscode);
+            console.log("Tipo da senha do banco:", typeof correctPasscode);
+            // --- DEBUGGING END ---
+
             const handleLogin = () => {
-                // =========================================================================
-                // CORREÇÃO APLICADA AQUI
-                // Compara o valor do input (string) com a senha do banco (convertida para string)
-                // =========================================================================
-                if (ui.passcodeInput.value === String(correctPasscode)) {
+                const enteredPasscode = ui.passcodeInput.value;
+
+                // --- DEBUGGING START ---
+                console.log("--------------------------------");
+                console.log("Tentativa de login:");
+                console.log("Senha digitada (enteredPasscode):", enteredPasscode);
+                console.log("Tipo da senha digitada:", typeof enteredPasscode);
+                console.log(`Comparando: (digitado) "${enteredPasscode.trim()}" === (salvo) "${String(correctPasscode).trim()}"`);
+                // --- DEBUGGING END ---
+
+                // Adicionado .trim() para remover possíveis espaços em branco acidentais
+                if (enteredPasscode.trim() === String(correctPasscode).trim()) {
+                    console.log("%cSUCESSO: As senhas correspondem.", "color: green; font-weight: bold;");
                     ui.loginOverlay.style.opacity = '0';
                     setTimeout(() => ui.loginOverlay.style.display = 'none', 300);
                     startApp();
                 } else {
+                    console.error("FALHA: As senhas NÃO correspondem.");
                     alert('Código incorreto!');
                     ui.passcodeInput.value = '';
                 }
@@ -758,6 +777,7 @@
             });
             ui.passcodeInput.focus();
         }
+
 
         function setupFirstAccessScreen() {
             ui.loginTitle.textContent = "Primeiro Acesso";
