@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Despesas da Val</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        :root {
+            --bg-color: #f8f9fa;
+            --surface-color: #ffffff;
+            --text-color-primary: #000000;
+            --text-color-secondary: #495057;
+            --border-color: #dee2e6;
+            --accent-color: #007bff;
+            --accent-color-hover: #0056b3;
+            --nubank-color: #820ad1;
+            --elite-color: #2b2b2b;
+            --smile-color: #ff6a17;
+            --mercadopago-color: #009ee3;
+            --diversos-color: #00a884;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 3px 6px rgba(0, 0, 0, 0.07);
+            --border-radius: 6px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color-primary);
+            margin: 0;
+            padding: 24px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-size: 14px;
+        }
+
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+
+        #login-box {
+            background: var(--surface-color);
+            padding: 24px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            width: 90%;
+            max-width: 320px;
+        }
+
+        #login-box h2 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+        }
+
+        #login-box p {
+            margin-bottom: 20px;
+            color: var(--text-color-secondary);
+            font-size: 0.9rem;
+        }
+
+        #passcode-input {
+            width: calc(100% - 24px);
+            padding: 10px 12px;
+            font-size: 1.5rem;
+            text-align: center;
+            letter-spacing: 0.5em;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        #passcode-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        #login-button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #login-button:hover {
+            background-color: var(--accent-color-hover);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .month-navigation {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 28px;
+            gap: 8px;
+        }
+
+        #currentMonthYear {
+            margin: 0 10px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .month-navigation button {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease-in-out;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+            font-weight: 500;
+        }
+
+        .month-navigation button:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        #prevMonthBtn,
+        #nextMonthBtn {
+            width: 38px;
+            padding: 0;
+            font-size: 1.25rem;
+        }
+
+        #saveDataBtn,
+        #restoreDataBtn,
+        #todayBtn,
+        #clearAllBtn,
+        #agendaBtn,
+        #compactDataBtn {
+            width: auto;
+            padding: 0 16px;
+            font-size: 0.9rem;
+            color: var(--accent-color);
+        }
+
+        #agendaBtn {
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        #agendaBtn:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        #todayBtn {
+            color: #28a745;
+            border-color: #28a745;
+        }
+
+        #todayBtn:hover {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #clearAllBtn {
+            color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        #clearAllBtn:hover {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        #saveDataBtn:hover,
+        #restoreDataBtn:hover,
+        #compactDataBtn:hover {
+            background-color: var(--accent-color);
+            color: var(--surface-color);
+        }
+
+        .summary-box {
+            background-color: var(--surface-color);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+        }
+
+        .summary-box h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-color-secondary);
+        }
+
+        .summary-box #totalGeral {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            align-items: start; /* CORREÇÃO: Impede que os cards estiquem verticalmente */
+        }
+
+        .grid-item {
+            background-color: var(--surface-color);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .full-width-item {
+            grid-column: 1 / -1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            /* CORREÇÃO: Removido flex-grow para evitar que a tabela estique desnecessariamente */
+        }
+
+        th,
+        td {
+            padding: 8px 10px;
+            text-align: left;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-color-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom-width: 2px;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: var(--bg-color);
+        }
+
+        td[contenteditable="true"]:focus {
+            outline: none;
+            background-color: #e9f2ff;
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
+        tfoot {
+            border-top: 2px solid var(--text-color-primary);
+        }
+
+        tfoot td {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nubank-header {
+            border-bottom-color: var(--nubank-color);
+        }
+
+        .elite-header {
+            border-bottom-color: var(--elite-color);
+        }
+
+        .smile-header {
+            border-bottom-color: var(--smile-color);
+        }
+
+        .mercadopago-header {
+            border-bottom-color: var(--mercadopago-color);
+        }
+
+        .diversos-header {
+            border-bottom-color: var(--diversos-color);
+        }
+
+        #status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--text-color-primary);
+            color: var(--surface-color);
+            padding: 10px 16px;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-md);
+            transition: opacity 0.5s, transform 0.5s;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+
+        #status[style*="opacity: 1"] {
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="login-overlay">
+        <div id="login-box">
+            <h2 id="login-title">Autenticação</h2>
+            <p id="login-message">Para sua segurança, digite o código de acesso.</p>
+            <input type="password" id="passcode-input" maxlength="4" inputmode="numeric" pattern="\d{4}">
+            <button id="login-button">Entrar</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Controle de Despesas</h1>
+
+        <div class="month-navigation">
+            <button id="prevMonthBtn" title="Mês Anterior">&lt;</button>
+            <h2 id="currentMonthYear" style="border: none; margin: 0;"></h2>
+            <button id="nextMonthBtn" title="Próximo Mês">&gt;</button>
+            <button id="todayBtn" title="Voltar para o mês atual">Hoje</button>
+            <button id="compactDataBtn" title="Eliminar linhas em branco entre os dados">Compactar</button> <button id="saveDataBtn" title="Salvar backup local em .txt">Salvar</button>
+            <button id="restoreDataBtn" title="Restaurar dados a partir de um backup">Resgatar</button>
+            <button id="clearAllBtn" title="Limpar todos os dados deste mês">Limpar tudo</button>
+            <button id="agendaBtn" onclick="window.open('https://luizcezarmelo.github.io/val/agenda', '_blank')" title="Abrir agenda em nova guia">Agenda</button>
+            <input type="file" id="restoreFileInput" accept=".txt,.json" style="display: none;">
+        </div>
+
+        <div class="summary-box">
+            <h3>Total Geral de Despesas do Mês</h3>
+            <div id="totalGeral">R$ 0,00</div>
+        </div>
+
+        <div class="grid-container">
+            <div class="grid-item">
+                <h2>Despesas Fixas</h2>
+                <table id="fixedExpensesTable">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fixedExpensesTbody"></tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td><strong>Total Fixo</strong></td>
+                            <td id="fixedTotal">R$ 0,00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="grid-item">
+                <h2 class="card-header nubank-header"><span>Nubank</span></h2>
+                <table id="nubankTable">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor (R$)</th>
+                            <th>Parcela (Ex: 01/12)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="nubankTbody"></tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td><strong>Total Nubank</strong></td>
+                            <td id="nubankTotal" colspan="2">R$ 0,00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="grid-item">
+                <h2 class="card-header elite-header"><span>ELITE</span></h2>
+                <table id="eliteTable">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor (R$)</th>
+                            <th>Parcela (Ex: 01/12)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="eliteTbody"></tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td><strong>Total ELITE</strong></td>
+                            <td id="eliteTotal" colspan="2">R$ 0,00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="grid-item">
+                <h2 class="card-header smile-header"><span>SMILE</span></h2>
+                <table id="smileTable">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor (R$)</th>
+                            <th>Parcela (Ex: 01/12)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="smileTbody"></tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td><strong>Total SMILE</strong></td>
+                            <td id="smileTotal" colspan="2">R$ 0,00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="grid-item">
+                <h2 class="card-header mercadopago-header"><span>MERCADO PAGO</span></h2>
+                <table id="mercadopagoTable">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor (R$)</th>
+                            <th>Parcela (Ex: 01/12)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mercadopagoTbody"></tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td><strong>Total MERCADO PAGO</strong></td>
+                            <td id="mercadopagoTotal" colspan="2">R$ 0,00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="grid-item">
+                <h2 class="card-header diversos-header"><span>Diversos</span></h2>
+                <table id="diversosTable">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor (R$)</th>
+                            <th>Parcela (Ex: 01/12)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="diversosTbody"></tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td><strong>Total Diversos</strong></td>
+                            <td id="diversosTotal" colspan="2">R$ 0,00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="grid-item full-width-item">
+                <h2>Resumo de Todas as Parcelas Ativas</h2>
+                <table id="installmentsSummaryTable">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Cartão</th>
+                            <th>Valor (R$)</th>
+                            <th>Parcela</th>
+                            <th>Mês de Vencimento</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="2"><strong>Total Parcelado</strong></td>
+                            <td id="installmentsTotal">R$ 0,00</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="status"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCeygrkw2tQHHYy5ocBcMBnRyYvAVXRW2g",
+            authDomain: "agenda-da-val.firebaseapp.com",
+            databaseURL: "https://agenda-da-val-default-rtdb.firebaseio.com",
+            projectId: "agenda-da-val",
+            storageBucket: "agenda-da-val.appspot.com",
+            messagingSenderId: "4483197465",
+            appId: "1:4483197465:web:a31a604e5ab0a3e7021888"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let current_date = new Date();
+        let debounceTimer;
+
+        const ui = {
+            loginOverlay: document.getElementById('login-overlay'),
+            loginTitle: document.getElementById('login-title'),
+            loginMessage: document.getElementById('login-message'),
+            passcodeInput: document.getElementById('passcode-input'),
+            loginButton: document.getElementById('login-button'),
+            currentMonthYear: document.getElementById('currentMonthYear'),
+            prevMonthBtn: document.getElementById('prevMonthBtn'),
+            nextMonthBtn: document.getElementById('nextMonthBtn'),
+            todayBtn: document.getElementById('todayBtn'),
+            compactDataBtn: document.getElementById('compactDataBtn'), // NOVO
+            saveDataBtn: document.getElementById('saveDataBtn'),
+            restoreDataBtn: document.getElementById('restoreDataBtn'),
+            restoreFileInput: document.getElementById('restoreFileInput'),
+            clearAllBtn: document.getElementById('clearAllBtn'),
+            fixedExpensesTable: document.getElementById('fixedExpensesTbody'),
+            nubankTable: document.getElementById('nubankTbody'),
+            eliteTable: document.getElementById('eliteTbody'),
+            smileTable: document.getElementById('smileTbody'),
+            mercadopagoTable: document.getElementById('mercadopagoTbody'),
+            diversosTable: document.getElementById('diversosTbody'),
+            installmentsSummaryTable: document.getElementById('installmentsSummaryTable').tBodies[0],
+            fixedTotal: document.getElementById('fixedTotal'),
+            nubankTotal: document.getElementById('nubankTotal'),
+            eliteTotal: document.getElementById('eliteTotal'),
+            smileTotal: document.getElementById('smileTotal'),
+            mercadopagoTotal: document.getElementById('mercadopagoTotal'),
+            diversosTotal: document.getElementById('diversosTotal'),
+            totalGeral: document.getElementById('totalGeral'),
+            status: document.getElementById('status')
+        };
+
+        document.addEventListener('DOMContentLoaded', initLogin);
+
+        function initLogin() {
+            const passcodeRef = ref(database, 'passcode');
+            onValue(passcodeRef, (snapshot) => {
+                const savedPasscode = snapshot.val();
+                if (savedPasscode) {
+                    setupLoginScreen(savedPasscode);
+                } else {
+                    setupFirstAccessScreen();
+                }
+            }, { onlyOnce: true });
+        }
+
+        function setupLoginScreen(correctPasscode) {
+            ui.loginTitle.textContent = "Acessar Painel";
+            ui.loginMessage.textContent = "Digite seu código de 4 dígitos para continuar.";
+            ui.loginButton.textContent = "Entrar";
+            ui.passcodeInput.focus(); // CORREÇÃO: Foco automático na senha
+
+            const handleLogin = () => {
+                if (ui.passcodeInput.value === correctPasscode) {
+                    ui.loginOverlay.style.opacity = '0';
+                    setTimeout(() => ui.loginOverlay.style.display = 'none', 300);
+                    startApp();
+                } else {
+                    alert('Código incorreto!');
+                    ui.passcodeInput.value = '';
+                }
+            };
+            ui.loginButton.addEventListener('click', handleLogin);
+            ui.passcodeInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+        }
+
+        function setupFirstAccessScreen() {
+            ui.loginTitle.textContent = "Primeiro Acesso";
+            ui.loginMessage.textContent = "Crie um código de 4 dígitos para proteger seus dados.";
+            ui.loginButton.textContent = "Salvar e Entrar";
+            ui.passcodeInput.focus(); // CORREÇÃO: Foco automático na senha
+
+            const handleSetup = () => {
+                const newPasscode = ui.passcodeInput.value;
+                if (newPasscode && newPasscode.length === 4 && !isNaN(newPasscode)) {
+                    set(ref(database, 'passcode'), newPasscode).then(() => {
+                        ui.loginOverlay.style.opacity = '0';
+                        setTimeout(() => ui.loginOverlay.style.display = 'none', 300);
+                        startApp();
+                    }).catch(err => alert("Erro ao salvar o código. Tente novamente."));
+                } else {
+                    alert('Por favor, insira um código de 4 números.');
+                }
+            };
+            ui.loginButton.addEventListener('click', handleSetup);
+            ui.passcodeInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleSetup();
+            });
+        }
+
+        function startApp() {
+            current_date = new Date(); // CORREÇÃO: Garante que sempre abre no mês atual
+            updateMonthDisplay();
+            loadData();
+
+            ui.prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+            ui.nextMonthBtn.addEventListener('click', () => changeMonth(1));
+            ui.todayBtn.addEventListener('click', () => { // CORREÇÃO: Lógica do botão "Hoje"
+                current_date = new Date();
+                updateMonthDisplay();
+                loadData();
+            });
+            ui.compactDataBtn.addEventListener('click', compactAllTables); // NOVO
+            ui.saveDataBtn.addEventListener('click', saveDataAsTxt);
+            ui.restoreDataBtn.addEventListener('click', () => ui.restoreFileInput.click());
+            ui.restoreFileInput.addEventListener('change', restoreDataFromFile);
+            ui.clearAllBtn.addEventListener('click', clearAllData);
+
+            setupTableListeners(ui.fixedExpensesTable, 'fixed');
+            setupTableListeners(ui.nubankTable, 'nubank');
+            setupTableListeners(ui.eliteTable, 'elite');
+            setupTableListeners(ui.smileTable, 'smile');
+            setupTableListeners(ui.mercadopagoTable, 'mercadopago');
+            setupTableListeners(ui.diversosTable, 'diversos');
+        }
+        
+        // NOVA FUNÇÃO: Compacta todas as tabelas, removendo linhas em branco
+        function compactAllTables() {
+            const tables = [
+                ui.fixedExpensesTable, ui.nubankTable, ui.eliteTable, 
+                ui.smileTable, ui.mercadopagoTable, ui.diversosTable
+            ];
+            let rowsRemoved = 0;
+            const isRowEmptyLocal = (row) => Array.from(row.cells).every(cell => cell.textContent.trim() === '');
+
+            tables.forEach(tbody => {
+                const rows = Array.from(tbody.rows);
+                // Itera de baixo para cima, até a segunda linha, para não remover a última (que serve para entrada)
+                for (let i = rows.length - 2; i >= 0; i--) {
+                    if (isRowEmptyLocal(rows[i])) {
+                        rows[i].remove();
+                        rowsRemoved++;
+                    }
+                }
+                ensureEmptyRow(tbody); // Garante que ainda existe uma linha vazia no final
+            });
+
+            if (rowsRemoved > 0) {
+                showStatus(`${rowsRemoved} linha(s) em branco removida(s). Salvando...`, 3000);
+                saveData(true); // Força o salvamento imediato
+            } else {
+                showStatus('Nenhuma linha em branco para remover.', 2000);
+            }
+        }
+
+        function saveDataAsTxt() {
+            const dataRef = ref(database, 'expenses/');
+            onValue(dataRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) {
+                    showStatus('Não há dados para salvar.', 3000);
+                    return;
+                }
+                const dataStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const date = new Date().toISOString().slice(0, 10);
+                a.download = `backup_despesas_${date}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showStatus('Backup gerado com sucesso!', 3000);
+            }, { onlyOnce: true });
+        }
+
+        function restoreDataFromFile(event) {
+            if (!confirm('ATENÇÃO! Isto irá substituir TODOS os dados existentes na nuvem pelos dados do arquivo. Deseja continuar?')) {
+                event.target.value = null;
+                return;
+            }
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parsedData = JSON.parse(e.target.result);
+                    const dataRef = ref(database, 'expenses/');
+                    set(dataRef, parsedData).then(() => {
+                        showStatus('Dados restaurados com sucesso!', 3000);
+                        loadData();
+                    }).catch(err => {
+                        showStatus('Erro ao salvar dados restaurados.', 5000);
+                        console.error(err);
+                    });
+                } catch (error) {
+                    showStatus('Erro: Arquivo de backup inválido.', 5000);
+                    console.error("Parse error:", error);
+                } finally {
+                    event.target.value = null;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function changeMonth(direction) {
+            saveData(true);
+            current_date.setMonth(current_date.getMonth() + direction);
+            updateMonthDisplay();
+            loadData();
+        }
+
+        function updateMonthDisplay() {
+            const month = current_date.toLocaleString('pt-BR', { month: 'long' });
+            const year = current_date.getFullYear();
+            ui.currentMonthYear.textContent = `${month.charAt(0).toUpperCase() + month.slice(1)} de ${year}`;
+        }
+
+        function getMonthYearKey(date) {
+            return `${date.getFullYear()}_${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        }
+
+        function showStatus(message, duration = 3000) {
+            ui.status.textContent = message;
+            ui.status.style.opacity = '1';
+            setTimeout(() => {
+                ui.status.style.opacity = '0';
+            }, duration);
+        }
+
+        function saveData(force = false) {
+            clearTimeout(debounceTimer);
+            const saveAction = () => {
+                const monthKey = getMonthYearKey(current_date);
+                const dataToSave = {
+                    fixed: parseTableData(ui.fixedExpensesTable),
+                    nubank: parseTableData(ui.nubankTable),
+                    elite: parseTableData(ui.eliteTable),
+                    smile: parseTableData(ui.smileTable),
+                    mercadopago: parseTableData(ui.mercadopagoTable),
+                    diversos: parseTableData(ui.diversosTable),
+                };
+                set(ref(database, 'expenses/' + monthKey), dataToSave)
+                    .then(() => showStatus('Salvo!'))
+                    .catch((error) => {
+                        console.error("Erro ao salvar: ", error);
+                        showStatus('Erro ao salvar!', 5000);
+                    });
+            };
+            if (force) {
+                saveAction();
+            } else {
+                debounceTimer = setTimeout(saveAction, 2000);
+            }
+        }
+
+        function loadData() {
+            const monthKey = getMonthYearKey(current_date);
+            const prevMonthDate = new Date(current_date);
+            prevMonthDate.setMonth(prevMonthDate.getMonth() - 1);
+            const prevMonthKey = getMonthYearKey(prevMonthDate);
+
+            const currentMonthRef = ref(database, 'expenses/' + monthKey);
+            const prevMonthRef = ref(database, 'expenses/' + prevMonthKey);
+
+            onValue(currentMonthRef, (currentSnapshot) => {
+                const currentData = currentSnapshot.val() || { fixed: [], nubank: [], elite: [], smile: [], mercadopago: [], diversos: [] };
+                
+                onValue(prevMonthRef, (prevSnapshot) => {
+                    const prevData = prevSnapshot.val() || { fixed: [], nubank: [], elite: [], smile: [], mercadopago: [], diversos: [] };
+
+                    const continuingFixed = (prevData.fixed || []).map(item => [item[0], item[1]]);
+                    const continuingNubank = processContinuingInstallments(prevData.nubank || []);
+                    const continuingElite = processContinuingInstallments(prevData.elite || []);
+                    const continuingSmile = processContinuingInstallments(prevData.smile || []);
+                    const continuingMercadoPago = processContinuingInstallments(prevData.mercadopago || []);
+                    const continuingDiversos = processContinuingInstallments(prevData.diversos || []);
+
+                    const combinedData = {
+                        fixed: combineData(currentData.fixed, continuingFixed),
+                        nubank: combineData(currentData.nubank, continuingNubank),
+                        elite: combineData(currentData.elite, continuingElite),
+                        smile: combineData(currentData.smile, continuingSmile),
+                        mercadopago: combineData(currentData.mercadopago, continuingMercadoPago),
+                        diversos: combineData(currentData.diversos, continuingDiversos)
+                    };
+
+                    populateTable(ui.fixedExpensesTable, combinedData.fixed);
+                    populateTable(ui.nubankTable, combinedData.nubank);
+                    populateTable(ui.eliteTable, combinedData.elite);
+                    populateTable(ui.smileTable, combinedData.smile);
+                    populateTable(ui.mercadopagoTable, combinedData.mercadopago);
+                    populateTable(ui.diversosTable, combinedData.diversos);
+
+                    [ui.fixedExpensesTable, ui.nubankTable, ui.eliteTable, ui.smileTable, ui.mercadopagoTable, ui.diversosTable].forEach(ensureEmptyRow);
+                    updateAllTotals();
+                    
+                    set(currentMonthRef, combinedData);
+
+                }, { onlyOnce: true });
+
+            }, { onlyOnce: true });
+        }
+
+        function combineData(currentData, prevData) {
+            if (!currentData || currentData.length === 0) {
+                return prevData;
+            }
+            const prevMap = new Map();
+            prevData.forEach(item => {
+                const description = item[0] || '';
+                const installment = item[2] || '';
+                prevMap.set(description + installment, item);
+            });
+
+            currentData.forEach(item => {
+                const description = item[0] || '';
+                const installment = item[2] || '';
+                const key = description + installment;
+                if (prevMap.has(key)) {
+                    prevMap.delete(key);
+                }
+            });
+            return [...currentData, ...Array.from(prevMap.values())];
+        }
+
+        function clearAllData() {
+            if (!confirm('ATENÇÃO! Isso vai apagar todos os dados visíveis deste mês. Deseja continuar?')) {
+                return;
+            }
+            const monthKey = getMonthYearKey(current_date);
+            const tablesToClear = [ui.fixedExpensesTable, ui.nubankTable, ui.eliteTable, ui.smileTable, ui.mercadopagoTable, ui.diversosTable];
+            set(ref(database, 'expenses/' + monthKey), null)
+                .then(() => {
+                    showStatus('Dados do mês atual limpos com sucesso!', 3000);
+                    tablesToClear.forEach(t => t.innerHTML = '');
+                    tablesToClear.forEach(ensureEmptyRow);
+                    updateAllTotals();
+                }).catch((error) => {
+                    console.error("Erro ao limpar dados: ", error);
+                    showStatus('Erro ao limpar os dados!', 5000);
+                });
+        }
+
+        function processContinuingInstallments(installments) {
+            return installments.reduce((acc, item) => {
+                const parts = (item[2] || "").match(/(\d+)\/(\d+)/);
+                if (parts && parts.length === 3) {
+                    const current = parseInt(parts[1], 10);
+                    const total = parseInt(parts[2], 10);
+                    if (current < total) {
+                        acc.push([item[0], item[1], `${current + 1}/${total}`]);
+                    }
+                }
+                return acc;
+            }, []);
+        }
+
+        function populateTable(tbody, dataArray) {
+            tbody.innerHTML = '';
+            dataArray.forEach(rowData => {
+                const row = tbody.insertRow();
+                rowData.forEach(cellData => {
+                    const cell = row.insertCell();
+                    cell.textContent = cellData;
+                    cell.setAttribute('contenteditable', 'true');
+                });
+            });
+        }
+
+        function parseTableData(tbody) {
+            return Array.from(tbody.rows).map(row => {
+                const rowData = Array.from(row.cells).map(cell => cell.textContent.trim());
+                if (rowData.some(cellData => cellData !== '')) {
+                    return rowData;
+                }
+                return null;
+            }).filter(rowData => rowData !== null);
+        }
+
+        function ensureEmptyRow(tbody) {
+            const isRowEmpty = (row) => {
+                for (let i = 0; i < row.cells.length; i++) {
+                    if (row.cells[i].textContent.trim() !== '') {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            if (tbody.rows.length === 0 || !isRowEmpty(tbody.rows[tbody.rows.length - 1])) {
+                addNewRow(tbody);
+            }
+        }
+
+        function addNewRow(tbody, focusFirstCell = false) {
+            const newRow = tbody.insertRow();
+            const colCount = tbody.parentElement.tHead.rows[0].cells.length;
+            for (let i = 0; i < colCount; i++) {
+                newRow.insertCell().setAttribute('contenteditable', 'true');
+            }
+            if (focusFirstCell) newRow.cells[0].focus();
+        }
+
+        function setupTableListeners(tbody, type) {
+            tbody.addEventListener('focusout', (e) => {
+                if (e.target.tagName === 'TD' && e.target.hasAttribute('contenteditable')) {
+                    const cell = e.target;
+                    if (cell.cellIndex === 1) {
+                        const text = cell.textContent.trim();
+                        if (text) {
+                            let number = parseCurrency(text);
+                            cell.textContent = number.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            updateTotals(type);
+                            saveData();
+                        }
+                    }
+                }
+            });
+
+            tbody.addEventListener('input', (e) => {
+                if (e.target.hasAttribute('contenteditable')) {
+                    updateTotals(type);
+                    saveData();
+                }
+            });
+
+            tbody.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.target.tagName === 'TD' && !e.shiftKey) {
+                    e.preventDefault();
+                    const cell = e.target;
+                    const row = cell.parentElement;
+                    const nextCellIndex = cell.cellIndex + 1;
+                    if (nextCellIndex < row.cells.length) {
+                        const nextCell = row.cells[nextCellIndex];
+                        if (nextCell && nextCell.hasAttribute('contenteditable')) {
+                            nextCell.focus();
+                        }
+                    } else {
+                        const nextRow = row.nextElementSibling;
+                        if (nextRow) {
+                            nextRow.cells[0].focus();
+                        } else {
+                            addNewRow(tbody, true);
+                        }
+                    }
+                }
+            });
+        }
+
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function parseCurrency(text) {
+            return parseFloat(String(text).replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+        }
+
+        function calculateColumnTotal(tbody, colIndex) {
+            return Array.from(tbody.rows).reduce((total, row) => total + (row.cells[colIndex] ? parseCurrency(row.cells[colIndex].textContent) : 0), 0);
+        }
+        
+        function updateInstallmentSummary() {
+            ui.installmentsSummaryTable.innerHTML = '';
+            const allInstallmentsRaw = [
+                ...parseTableData(ui.nubankTable).map(d => ({ data: d, card: 'Nubank' })),
+                ...parseTableData(ui.eliteTable).map(d => ({ data: d, card: 'ELITE' })),
+                ...parseTableData(ui.smileTable).map(d => ({ data: d, card: 'SMILE' })),
+                ...parseTableData(ui.mercadopagoTable).map(d => ({ data: d, card: 'MERCADO PAGO' })),
+                ...parseTableData(ui.diversosTable).map(d => ({ data: d, card: 'Diversos' }))
+            ];
+            
+            const installmentsWithData = allInstallmentsRaw.map(({ data, card }) => {
+                const description = data[0];
+                const valueText = data[1];
+                const installmentText = data[2] || "";
+                const parts = installmentText.match(/(\d+)\/(\d+)/);
+                if (!parts || !description || !valueText) return null;
+
+                const currentPart = parseInt(parts[1], 10);
+                const totalParts = parseInt(parts[2], 10);
+                const remaining = totalParts - currentPart;
+
+                if (remaining < 0) return null;
+
+                const dueDate = new Date(current_date);
+                dueDate.setMonth(dueDate.getMonth() + remaining);
+                dueDate.setDate(1);
+
+                const value = parseCurrency(valueText);
+                return { description, card, value, installmentText, dueDate };
+            }).filter(item => item !== null);
+            
+            installmentsWithData.sort((a, b) => a.dueDate - b.dueDate);
+
+            let totalInstallmentsValue = 0;
+            installmentsWithData.forEach(item => {
+                totalInstallmentsValue += item.value;
+                const endMonth = item.dueDate.toLocaleString('pt-BR', { month: 'long' });
+                const endYear = item.dueDate.getFullYear();
+                const row = ui.installmentsSummaryTable.insertRow();
+                row.insertCell().textContent = item.description;
+                row.insertCell().textContent = item.card;
+                const valueCell = row.insertCell();
+                valueCell.textContent = item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                row.insertCell().textContent = item.installmentText;
+                row.insertCell().textContent = `${endMonth.charAt(0).toUpperCase() + endMonth.slice(1)}/${endYear}`;
+            });
+
+            document.getElementById('installmentsTotal').textContent = formatCurrency(totalInstallmentsValue);
+        }
+
+        function updateTotals(type) {
+            const totalsMap = {
+                fixed: { el: ui.fixedTotal, table: ui.fixedExpensesTable },
+                nubank: { el: ui.nubankTotal, table: ui.nubankTable },
+                elite: { el: ui.eliteTotal, table: ui.eliteTable },
+                smile: { el: ui.smileTotal, table: ui.smileTable },
+                mercadopago: { el: ui.mercadopagoTotal, table: ui.mercadopagoTable },
+                diversos: { el: ui.diversosTotal, table: ui.diversosTable }
+            };
+
+            if (totalsMap[type]) {
+                totalsMap[type].el.textContent = formatCurrency(calculateColumnTotal(totalsMap[type].table, 1));
+            }
+            updateAllTotals();
+        }
+
+        function updateAllTotals() {
+            const fixedTotal = calculateColumnTotal(ui.fixedExpensesTable, 1);
+            const nubankTotal = calculateColumnTotal(ui.nubankTable, 1);
+            const eliteTotal = calculateColumnTotal(ui.eliteTable, 1);
+            const smileTotal = calculateColumnTotal(ui.smileTable, 1);
+            const mercadopagoTotal = calculateColumnTotal(ui.mercadopagoTable, 1);
+            const diversosTotal = calculateColumnTotal(ui.diversosTable, 1);
+
+            ui.fixedTotal.textContent = formatCurrency(fixedTotal);
+            ui.nubankTotal.textContent = formatCurrency(nubankTotal);
+            ui.eliteTotal.textContent = formatCurrency(eliteTotal);
+            ui.smileTotal.textContent = formatCurrency(smileTotal);
+            ui.mercadopagoTotal.textContent = formatCurrency(mercadopagoTotal);
+            ui.diversosTotal.textContent = formatCurrency(diversosTotal);
+
+            const totalGeral = fixedTotal + nubankTotal + eliteTotal + smileTotal + mercadopagoTotal + diversosTotal;
+            ui.totalGeral.textContent = formatCurrency(totalGeral);
+
+            updateInstallmentSummary();
+        }
+    </script>
+</body>
+</html>
