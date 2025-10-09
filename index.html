@@ -250,12 +250,8 @@
             text-align: center;
             width: 60px;
         }
-        /* NOVA ALTERAÇÃO: Garante que o checkbox no total fique alinhado */
         tfoot td:last-child {
              vertical-align: middle;
-        }
-        tfoot input[type="checkbox"] {
-            cursor: pointer;
         }
         th {
             font-weight: 600;
@@ -367,7 +363,7 @@
                         <tr class="total-row">
                             <td><strong>Total Fixo</strong></td>
                             <td id="fixedTotal">R$ 0,00</td>
-                            <td><input type="checkbox" id="checkAllFixed" title="Marcar/Desmarcar todos"></td>
+                            <td><input type="checkbox" id="checkAllFixed"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -388,7 +384,7 @@
                         <tr class="total-row">
                             <td><strong>Total Nubank</strong></td>
                             <td id="nubankTotal" colspan="2">R$ 0,00</td>
-                            <td><input type="checkbox" id="checkAllNubank" title="Marcar/Desmarcar todos"></td>
+                            <td><input type="checkbox" id="checkAllNubank"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -409,7 +405,7 @@
                         <tr class="total-row">
                             <td><strong>Total ELITE</strong></td>
                             <td id="eliteTotal" colspan="2">R$ 0,00</td>
-                            <td><input type="checkbox" id="checkAllElite" title="Marcar/Desmarcar todos"></td>
+                            <td><input type="checkbox" id="checkAllElite"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -430,7 +426,7 @@
                         <tr class="total-row">
                             <td><strong>Total SMILE</strong></td>
                             <td id="smileTotal" colspan="2">R$ 0,00</td>
-                            <td><input type="checkbox" id="checkAllSmile" title="Marcar/Desmarcar todos"></td>
+                            <td><input type="checkbox" id="checkAllSmile"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -451,7 +447,7 @@
                         <tr class="total-row">
                             <td><strong>Total MERCADO PAGO</strong></td>
                             <td id="mercadopagoTotal" colspan="2">R$ 0,00</td>
-                            <td><input type="checkbox" id="checkAllMercadoPago" title="Marcar/Desmarcar todos"></td>
+                            <td><input type="checkbox" id="checkAllMercadoPago"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -472,7 +468,7 @@
                         <tr class="total-row">
                             <td><strong>Total Diversos</strong></td>
                             <td id="diversosTotal" colspan="2">R$ 0,00</td>
-                            <td><input type="checkbox" id="checkAllDiversos" title="Marcar/Desmarcar todos"></td>
+                            <td><input type="checkbox" id="checkAllDiversos"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -643,8 +639,6 @@
             setupTableListeners(ui.smileTable, 'smile');
             setupTableListeners(ui.mercadopagoTable, 'mercadopago');
             setupTableListeners(ui.diversosTable, 'diversos');
-            // NOVA ALTERAÇÃO: Ativa os listeners para os checkboxes "marcar todos"
-            setupCheckAllListeners();
         }
         
         function compactAllTables() {
@@ -677,8 +671,6 @@
                     }
                 }
                 ensureEmptyRow(tbody);
-                 // NOVA ALTERAÇÃO: Atualiza o estado do checkbox "mestre" após a compactação
-                updateCheckAllState(tbody);
             });
             if (rowsRemoved > 0) {
                 showStatus(`${rowsRemoved} linha(s) em branco removida(s). Salvando...`, 3000);
@@ -832,8 +824,6 @@
                     const allTbodys = [ui.fixedExpensesTable, ui.nubankTable, ui.eliteTable, ui.smileTable, ui.mercadopagoTable, ui.diversosTable];
                     allTbodys.forEach(ensureEmptyRow);
                     updateAllTotals();
-                    // NOVA ALTERAÇÃO: Define o estado inicial dos checkboxes "mestre" ao carregar os dados
-                    allTbodys.forEach(updateCheckAllState);
                     set(currentMonthRef, combinedData);
                 }, {
                     onlyOnce: true
@@ -876,8 +866,6 @@
                     tablesToClear.forEach(t => {
                         t.innerHTML = '';
                         ensureEmptyRow(t);
-                        // NOVA ALTERAÇÃO: Reseta o estado do checkbox "mestre" ao limpar a tabela
-                        updateCheckAllState(t);
                     });
                     updateAllTotals();
                 }).catch((error) => {
@@ -988,8 +976,6 @@
             
             tbody.addEventListener('change', (e) => {
                 if(e.target.type === 'checkbox') {
-                    // NOVA ALTERAÇÃO: Atualiza o estado do checkbox "mestre"
-                    updateCheckAllState(tbody); 
                     saveData(true); 
                 }
             });
@@ -1018,76 +1004,6 @@
                     }
                 }
             });
-        }
-
-        // NOVA ALTERAÇÃO: Nova função para configurar os checkboxes "marcar todos"
-        function setupCheckAllListeners() {
-            const checkAllMap = {
-                'checkAllFixed': ui.fixedExpensesTable,
-                'checkAllNubank': ui.nubankTable,
-                'checkAllElite': ui.eliteTable,
-                'checkAllSmile': ui.smileTable,
-                'checkAllMercadoPago': ui.mercadopagoTable,
-                'checkAllDiversos': ui.diversosTable
-            };
-
-            for (const [checkboxId, tbody] of Object.entries(checkAllMap)) {
-                const checkAllBox = document.getElementById(checkboxId);
-                if (checkAllBox) {
-                    checkAllBox.addEventListener('change', (e) => {
-                        const isChecked = e.target.checked;
-                        const rowCheckboxes = tbody.querySelectorAll('input[type="checkbox"]');
-                        rowCheckboxes.forEach(box => {
-                            box.checked = isChecked;
-                        });
-                        saveData(true); // Salva as alterações
-                    });
-                }
-            }
-        }
-
-        // NOVA ALTERAÇÃO: Nova função para sincronizar o estado do checkbox "marcar todos"
-        function updateCheckAllState(tbody) {
-            const checkAllMap = {
-                'fixedExpensesTbody': 'checkAllFixed',
-                'nubankTbody': 'checkAllNubank',
-                'eliteTbody': 'checkAllElite',
-                'smileTbody': 'checkAllSmile',
-                'mercadopagoTbody': 'checkAllMercadoPago',
-                'diversosTbody': 'checkAllDiversos'
-            };
-
-            const checkAllBoxId = checkAllMap[tbody.id];
-            if (!checkAllBoxId) return;
-
-            const checkAllBox = document.getElementById(checkAllBoxId);
-            const rowCheckboxes = tbody.querySelectorAll('tbody input[type="checkbox"]');
-            
-            if (rowCheckboxes.length === 0) {
-                checkAllBox.checked = false;
-                checkAllBox.indeterminate = false;
-                return;
-            }
-
-            const totalChecked = Array.from(rowCheckboxes).filter(box => box.checked).length;
-            const totalRows = Array.from(tbody.rows).filter(row => row.cells[0]?.textContent.trim() !== '' || row.cells[1]?.textContent.trim() !== '').length;
-            
-            if (totalRows === 0) {
-                 checkAllBox.checked = false;
-                 checkAllBox.indeterminate = false;
-                 return;
-            }
-
-            if (totalChecked === 0) {
-                checkAllBox.checked = false;
-                checkAllBox.indeterminate = false;
-            } else if (totalChecked === totalRows) {
-                checkAllBox.checked = true;
-                checkAllBox.indeterminate = false;
-            } else {
-                checkAllBox.checked = false;
-                checkAllBox.indeterminate = true;
-            }
         }
 
         function formatCurrency(value) {
